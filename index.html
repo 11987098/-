@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>腰形凸轮切点等距磨削数学模型</title>
+    <style>
+        body {
+            font-family: "SimSun", serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 20px;
+            margin-top: 28px;
+            margin-bottom: 12px;
+        }
+        h3 {
+            font-size: 18px;
+            margin-top:20px;
+            margin-bottom:10px;
+        }
+        .formula {
+            text-align:center;
+            margin:16px 0;
+            font-size:18px;
+        }
+        p {
+            margin:10px 0;
+        }
+        .note {
+            background-color: #f8f8f8;
+            padding:10px 14px;
+            border-left:3px solid #666;
+            margin:12px 0;
+        }
+        .copyright{
+            margin-top:40px;
+            font-size:14px;
+            color:#444;
+            border-top:1px solid #ddd;
+            padding-top:15px;
+        }
+    </style>
+    <!-- 引入MathJax渲染LaTeX公式 -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>腰形凸轮切点等距磨削数学模型</h1>
+
+    <h2>符号说明</h2>
+    <p>
+        \(r_s\)：砂轮半径；<br>
+        \(P(x_p,y_p)\)：腰形凸轮理论轮廓上的磨削切点；<br>
+        \(\vec{n}\)：凸轮轮廓在切点\(P\)处的单位外法向量，方向垂直于轮廓切线向外；<br>
+        \(O_s(x_s,y_s)\)：砂轮中心坐标；<br>
+        \(C\)：凸轮旋转角度，对应机床C轴；<br>
+        \(X\)：机床X轴坐标，代表凸轮回转中心到砂轮中心的径向距离；<br>
+        \(R\)：腰形凸轮端部圆弧半径；<br>
+        \(O_c(x_c,y_c)\)：腰形凸轮端部圆弧圆心。
+    </p>
+
+    <h2>1 平面轮廓切点磨削通用等距公式</h2>
+    <p>切点跟踪磨削的核心数学原理为轮廓等距偏移：砂轮中心沿工件轮廓法线方向偏移一个砂轮半径，保证砂轮圆周与凸轮轮廓保持单点相切，公法线重合。</p>
+    <div class="formula">
+        \(\boldsymbol{O_s} = \boldsymbol{P} + r_s \cdot \vec{n}\)
+    </div>
+
+    <h2>2 腰形凸轮分段数学模型</h2>
+    <p>腰形凸轮轮廓由两段平行直线段与两端凸圆弧段组合而成，分段建立砂轮中心轨迹方程。</p>
+
+    <h3>2.1 端部凸圆弧段</h3>
+    <p>凸轮轮廓上切点坐标：</p>
+    <div class="formula">
+        \[
+        \begin{cases}
+        x_p = x_c + R\cos\theta \\
+        y_p = y_c + R\sin\theta
+        \end{cases}
+        \]
+    </div>
+    <p>圆弧轮廓单位外法向量 \(\vec{n}=(\cos\theta,\sin\theta)\)。<br>代入通用等距公式，得到砂轮中心直角坐标：</p>
+    <div class="formula">
+        \[
+        \begin{cases}
+        x_s = x_c + (R+r_s)\cos\theta \\
+        y_s = y_c + (R+r_s)\sin\theta
+        \end{cases}
+        \]
+    </div>
+    <p>砂轮中心轨迹为与工件圆弧同心的放大圆弧，轨迹半径为\(R+r_s\)。</p>
+    <div class="note">注：直线段与圆弧段的交界位置，轮廓法向量发生突变，轨迹需要做平滑处理，避免机床运动冲击。</div>
+
+    <h3>2.2 平行直线段</h3>
+    <p>设直线轮廓单位外法向量 \(\vec{n}=(n_x,n_y)\)，砂轮中心坐标方程：</p>
+    <div class="formula">
+        \[
+        \begin{cases}
+        x_s = x_p + r_s \cdot n_x \\
+        y_s = y_p + r_s \cdot n_y
+        \end{cases}
+        \]
+    </div>
+    <p>砂轮中心轨迹为与工件轮廓直线平行，向外平移距离\(r_s\)的平行线。</p>
+
+    <h2>3 直角坐标转机床极坐标（X/C联动点位）</h2>
+    <p>将砂轮中心直角坐标\((x_s,y_s)\)转化为凸轮磨机床X、C联动坐标：</p>
+    <div class="formula">
+        \(X = \sqrt{x_s^2+y_s^2}\)
+    </div>
+    <div class="formula">
+        \(C = \arctan2(y_s,x_s)\)
+    </div>
+    <p>计算所得\((X,C)\)组合，输出格式为<code>X**.* C**.* F***</code>，构成数控点位加工程序。</p>
+
+    <h2>4 内凹轮廓模型（拓展）</h2>
+    <p>若存在内凹型轮廓，砂轮中心沿轮廓内法线方向偏移，公式如下：</p>
+    <div class="formula">
+        \(\boldsymbol{O_s} = \boldsymbol{P} - r_s \cdot \vec{n}\)
+    </div>
+    <p>几何约束条件：砂轮半径必须小于凹轮廓最小曲率半径，即\(r_s &lt; R_{凹}\)，不满足条件会发生几何干涉，无法完成磨削。</p>
+
+    <h2>5 等距偏移算法与G54坐标系整体平移对比</h2>
+    <p>1. <strong>轮廓等距偏移算法</strong>：用于软件后处理生成NC程序。凸轮每一个转角位置，均沿该点轮廓法线单独偏移砂轮半径；轮廓各处偏移方向不同。当砂轮半径发生变化时，整条X/C联动轨迹必须全部重新计算。</p>
+    <p>2. <strong>G54工件原点平移补偿</strong>：对全部X坐标施加统一增量，属于整体平行平移，<strong>不属于轮廓法线等距偏移</strong>。仅适用于砂轮微量修整补偿；砂轮修整量较大时，切点几何关系产生偏移，凸轮升程轮廓发生失真。</p>
+
+    <h2>6 软件计算结果与工厂实测数据对比</h2>
+    <p>1. 165砂轮规格：软件计算轨迹与工厂实际加工数据对比，最大偏差0.7μm；</p>
+    <p>2. 200砂轮规格：本算法计算结果与同类型商用软件计算结果对比，最大偏差0.2μm。</p>
+
+    <div class="copyright">
+        所有权：胡海亮<br>
+        个人学习笔记
+    </div>
+</body>
+</html>
